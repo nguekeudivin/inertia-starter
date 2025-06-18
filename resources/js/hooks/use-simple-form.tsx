@@ -1,11 +1,17 @@
 'use client';
 
 import { pick } from '@/lib/utils';
+import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
 
-export function useSimpleForm({ defaultValues, schema, onUpdate }: { defaultValues: any; schema?: any; onUpdate?: any }) {
-    const [values, setValues] = useState<any>(defaultValues);
+type ValuesType = Record<string, any>;
+
+export function useSimpleForm<T extends ValuesType>({ defaultValues, schema, onUpdate }: { defaultValues: T; schema?: any; onUpdate?: any }) {
+    const form = useForm<T>(defaultValues);
+
+    const [values, setValues] = useState<ValuesType>(defaultValues);
     const [errors, setErrors] = useState<any>({});
+
     const setValue = (name: string, value: any) => {
         setValues((prevValues: any) => {
             const newValues = {
@@ -15,7 +21,9 @@ export function useSimpleForm({ defaultValues, schema, onUpdate }: { defaultValu
             if (onUpdate) onUpdate(newValues, name);
             return newValues;
         });
+        form.setData(name as any, value);
     };
+
     function handleChange(e: any) {
         const { name, value } = e.target;
         setValue(name, value);
